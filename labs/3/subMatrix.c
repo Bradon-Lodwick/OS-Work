@@ -20,7 +20,7 @@ int subMatrix(int matrix[9][9])
 		{
 			for(k = bL; i= <bR; i++)
 			{
-				value = matrix[j][k];
+				value = matrix[j][k] - 1;
 				if(blank[value] == 1)
 				{
 					printf("error in square %d", i);
@@ -31,16 +31,19 @@ int subMatrix(int matrix[9][9])
 				{
 					blank[value] = 1;
 				}
-
+				else
+				{
+					printf("What?");
+				}
 			}
-
+			bL += 3;
+			bR += 3;
 			if(blank[value] == 1)
 			{
 				break;
 			}
 
-			bL += 3;
-			bR += 3;
+
 		}
 		if(((i + 1) % 3) == 0)
 		{
