@@ -16,9 +16,9 @@ int subMatrix(int matrix[9][9])
 	for(i = 0; i < 9; i++)
 	{
 		blank[9] = {0,0,0,0,0,0,0,0,0};
-		for(j = bT; i <= bB; i++)
+		for(j = bT; j <= bB; j++)
 		{
-			for(k = bL; i= <bR; i++)
+			for(k = bL; k <= bR; k++)
 			{
 				value = matrix[j][k] - 1;
 				if(blank[value] == 1)
@@ -50,7 +50,7 @@ int subMatrix(int matrix[9][9])
 			bT += 3;
 			bB += 3;
 			bL = 0;
-			bR = 0;
+			bR = 2;
 		}
 	}
 	return result;
