@@ -8,7 +8,7 @@ int sudoku[9][9] = {
 	{6, 7, 2, 1, 9, 5, 3, 4, 8},
 	{1, 9, 8, 3, 4, 2, 5, 6, 7},
 
-	{8, 5, 9, 7, 6, 1, 4, 2, 4},
+	{8, 5, 9, 7, 6, 1, 4, 2, 3},
 	{4, 2, 6, 8, 5, 3, 7, 9, 1},
 	{7, 1, 3, 9, 2, 4, 8, 5, 6},
 
@@ -91,20 +91,22 @@ int *verticalThread()
 // Thread for square check
 int *squareThread()
 {
+	// Check array holding if values were values were found already
 	int blank[9] = {0};
 
+	// i is loop counter for number of squares, j for row of square, k for column of square
 	int i, j, k;
-	int bL = 0;
-	int bR = 2;
-	int bT = 0;
-	int bB = 2;
-	int value;
-	int result = 1;
-	int z;
+	int bL = 0; // Left bound
+	int bR = 2; // Right bound
+	int bT = 0; // Top bound
+	int bB = 2; // Bottom bound
+	int value; // Value at current location
+	int result = 1; // Whether solution valid
+	int z; // Counter used to reset blank
 
 	for(i = 0; i < 9; i++)
 	{
-		for(z = 0; z < 5; z++)
+		for(z = 0; z < 9; z++)
 		{
 			blank[z] = 0;
 		}
@@ -120,13 +122,9 @@ int *squareThread()
 					result = 0;
 					break;
 				}
-				if(blank[value] == 0)
-				{
-					blank[value] = 1;
-				}
 				else
 				{
-					printf("Wat?");
+					blank[value] = 1;
 				}
 			}
 			bL += 3;
