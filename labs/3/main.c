@@ -5,7 +5,7 @@
 // Defines the 2D array that holds the given sudoku
 int sudoku[9][9] = {
 	{5, 3, 4, 6, 7, 8, 9, 1, 2},
-	{6, 7, 2, 1, 9, 5, 3, 4, 8},
+	{6, 3, 2, 1, 9, 5, 3, 4, 8},
 	{1, 9, 8, 3, 4, 2, 5, 6, 7},
 
 	{8, 5, 9, 7, 6, 1, 4, 2, 3},
@@ -95,7 +95,7 @@ int *squareThread()
 	int blank[9] = {0};
 
 	// i is loop counter for number of squares, j for row of square, k for column of square
-	int i, j, k;
+	int i, j, k, SE;
 	int bL = 0; // Left bound
 	int bR = 2; // Right bound
 	int bT = 0; // Top bound
@@ -110,7 +110,7 @@ int *squareThread()
 		{
 			blank[z] = 0;
 		}
-
+		SE = 0;
 		for(j = bT; j <= bB; j++)
 		{
 			for(k = bL; k <= bR; k++)
@@ -120,6 +120,7 @@ int *squareThread()
 				{
 					printf("Squaerror in square %d\n", i + 1);
 					result = 0;
+					SE = 1;
 					break;
 				}
 				else
@@ -127,15 +128,15 @@ int *squareThread()
 					blank[value] = 1;
 				}
 			}
-			bL += 3;
-			bR += 3;
-			if(blank[value] == 1)
+			if(SE == 1)
 			{
 				break;
 			}
 
 
 		}
+		bL += 3;
+		bR += 3;
 		if(((i + 1) % 3) == 0)
 		{
 			bT += 3;
