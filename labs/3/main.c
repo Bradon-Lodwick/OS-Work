@@ -3,19 +3,8 @@
 #include <pthread.h>
 
 // Defines the 2D array that holds the given sudoku
-int sudoku[9][9] = {
-	{5, 3, 4, 6, 7, 8, 9, 1, 2},
-	{6, 3, 2, 1, 9, 5, 3, 4, 8},
-	{1, 9, 8, 3, 4, 2, 5, 6, 7},
-
-	{8, 5, 9, 7, 6, 1, 4, 2, 3},
-	{4, 2, 6, 8, 5, 3, 7, 9, 1},
-	{7, 1, 3, 9, 2, 4, 8, 5, 6},
-
-	{9, 6, 1, 5, 3, 7, 2, 8, 4},
-	{2, 8, 7, 4, 1, 9, 6, 3, 5},
-	{3, 4, 5, 2, 8, 6, 1, 7, 9}
-};
+int sudoku[9][9];
+int err = 0;
 
 int *horizontalThread()
 {
@@ -33,7 +22,11 @@ int *horizontalThread()
 			//Nums[row][col]
 			n = sudoku[i][j];
 
-			if (CHK[n-1] == 0)
+			if (n == 0)
+			{
+				//do nothing, zeroes are allowed
+			}
+			else if (CHK[n-1] == 0)
 			{
 				CHK[n-1] = 1;
 			}
@@ -41,6 +34,7 @@ int *horizontalThread()
 			{
 				printf("Horizontal error in row %d, col %d\n", i + 1, j + 1);
 				result = 0;
+				err = 1;
 				break; 
 			}
 		}
@@ -69,6 +63,10 @@ int *verticalThread()
 			//Nums[row][col]
 			n = sudoku[j][i];
 
+			if (n == 0)
+			{
+				//do nothing, zeroes are allowed
+			}
 			if (CHK[n-1] == 0)
 			{
 				CHK[n-1] = 1;
@@ -77,6 +75,7 @@ int *verticalThread()
 			{
 				printf("Vertical error in row %d, col %d\n", j + 1, i + 1);
 				result = 0;
+				err = 1;
 				break; 
 			}
 		}
@@ -116,11 +115,16 @@ int *squareThread()
 			for(k = bL; k <= bR; k++)
 			{
 				value = sudoku[j][k] - 1;
-				if(blank[value] == 1)
+				if (value == -1)
+				{
+					//do nothing
+				}
+				else if(blank[value] == 1)
 				{
 					printf("Squaerror in square %d\n", i + 1);
 					result = 0;
 					SE = 1;
+					err = 1;
 					break;
 				}
 				else
@@ -151,6 +155,27 @@ int *squareThread()
 
 int main()
 {
+	int i=0;
+	int j=0;
+	FILE *file;
+	size_t count;
+	char *l = malloc(256);
+	file = fopen("puzzle.txt", "r");
+	if (file == NULL)
+	{
+		printf("Error Opening File puzzle.txt");
+		return(-1);
+	}
+	while(!feof(file))
+	{
+		for(i=0;i<9;i++)
+		{
+			for(j=0;j<9;j++)
+			{
+				fscanf(file, "%d ", &sudoku[i][j]);
+			}
+		}
+	}
 	
 	// Calls the threads that will be used
 	pthread_t horizontal, vertical, square;
@@ -164,4 +189,13 @@ int main()
 	pthread_join(horizontal, NULL);
 	pthread_join(vertical, NULL);
 	pthread_join(square, NULL);
+	fclose(file);
+	if(err == 1)
+	{
+		printf("Invalid Puzzle \n");
+	}
+	else if(err == 0)
+	{
+		printf("Valid Puzzle \n");
+	}
 }
