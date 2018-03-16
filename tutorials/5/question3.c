@@ -16,7 +16,7 @@ void *bellcurve(struct student *BS)
 
 int main()
 {
-	struct student S[5];
+	struct student [5];
 	int i;
 	pthread_t id[5];
 	printf("Please Enter 5 Students info: \n");

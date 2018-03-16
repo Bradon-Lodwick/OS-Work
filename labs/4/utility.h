@@ -1,6 +1,5 @@
 /*
- * Host Dispatcher Shell Project for SOFE 3950U / CSCI 3020U: Operating Systems
- *
+ * Host Dispatcher Shell Project for SOFE 3950U / CSCI 3020U: Operating Systems *
  * Copyright (C) 2015, <GROUP MEMBERS>
  * All rights reserved.
  * 
@@ -13,19 +12,20 @@
 
 // Resources structure containing integers for each resource constraint and an
 // array of 1024 for the memory
-// typedef struct {
-//  ...
-//  ...
-// } resources;
+typedef struct {
+	int printer = 2;
+	int scanner = 1;
+	int modem = 1;
+	int CD = 2;
+	int MEMORY[1024] = {0};
+} resources;
 
 
 // Processes structure containing all of the process details parsed from the 
 // input file, should also include the memory address (an index) which indicates
 // where in the resources memory array its memory was allocated
-// typedef struct {
-//  ...
-//  ...
-// } process;
+typedef struct {
+} process;
 
 
 // Include your relevant functions declarations here they must start with the 
@@ -46,4 +46,4 @@
 // extern void load_dispatch(char *dispatch_file, node_t *queue);
 
 
-#endif /* UTILITY_H_ */
+endif /* UTILITY_H_ */
