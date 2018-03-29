@@ -25,14 +25,15 @@ typedef struct {
 // input file, should also include the memory address (an index) which indicates
 // where in the resources memory array its memory was allocated
 typedef struct {
-	int arrival_time;
+	int arrivalTime;
 	int priority;
-	int processor_time;
-	int Memsize;
-	int Rprinters;
-	int Rscanners;
-	int Rmodems;
-	int Rcds;
+	int processorTime;
+	int mBytes;
+	int numPrinters;
+	int numScanners;
+	int numModems;
+	int numCDs;
+	int memPointer;
 } process;
 
 
@@ -54,4 +55,8 @@ typedef struct {
 // extern void load_dispatch(char *dispatch_file, node_t *queue);
 
 
+<<<<<<< HEAD
 endif /* UTILITY_H_ */
+=======
+#endif /* UTILITY_H_ */
+>>>>>>> 6012c8f64de17e6349e451f33530e248bcc388ac
