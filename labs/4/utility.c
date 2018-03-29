@@ -18,13 +18,13 @@ int alloc_mem(resources res, int size)
 	int BlockFound = 0;
 	for (i=0;i<1024;i++)
 	{
-		if(res.MEMORY[i] == 0)
+		if(res.memory[i] == 0)
 		{
 			BlockFound = 1;
 			for(j=i;(j-i) < size;j++)
 			{
 				//if the scanned block has an allocated spot
-				if (res.MEMORY[j] == 1)
+				if (res.memory[j] == 1)
 				{
 					i=j;
 					BlockFound = 0;
@@ -37,7 +37,7 @@ int alloc_mem(resources res, int size)
 				//allocate the memory
 				for(j=i;(j-i) < size;j++)
 				{
-					res.MEMORY[j] = 1;
+					res.memory[j] = 1;
 				}
 				return i;
 			}
@@ -51,7 +51,7 @@ int free_mem(resources res, int index, int size)
 	int i;
 	for (i=index;i < size;i++)
 	{
-		res.MEMORY[index+i] = 0;
+		res.memory[index+i] = 0;
 	}
 	return 1;
 }
@@ -76,24 +76,22 @@ int countlines(char *file) {
 	}
 };
 
-void load_dispatch(char *dispatchlist, node_t *queue)
+void *load_dispatch(char *dispatchlistname, struct proc *processes, int lines)
 {
-	// Count the number of lines in the dispatchlist
-	int lines = countlines(filename);
-
+	// Load the dispatchlist
+	FILE *dispatchlist;
+	dispatchlist = fopen(dispatchlistname, "r");
 	if (dispatchlist == NULL) {
 		printf("Error opening dispatchlist\n");
-		return -1;
 	}
 	else {
-		struct process processes[lines];
 		int processIndex;
-		for (processIndex =0; processIndex < lines; processIndex++){
+		for (processIndex = 0; processIndex < lines; processIndex++){
 			fscanf(dispatchlist, "%d, %d, %d, %d, %d, %d, %d, %d\n", 
 								&processes[processIndex].arrivalTime, &processes[processIndex].priority, &processes[processIndex].processorTime, 
 								&processes[processIndex].mBytes, &processes[processIndex].numPrinters, &processes[processIndex].numScanners, 
 								&processes[processIndex].numModems, &processes[processIndex].numCDs);
 		}
-	
 	}
+			
 }

@@ -31,11 +31,11 @@ int main(int argc, char *argv[])
     // ==================== YOUR CODE HERE ==================== //
     // The name of the file with all the processes in it
 	char *filename = "dispatchlist";
-	// Load the dispatchlist
-	FILE *dispatchlist;
-	dispatchlist = fopen(filename, "r");
-	// Checks to make sure the dispatchlist was loaded correctly
-	load_dispatch(dispatchlist, NODE THING HERE);
+	// Loads the dispatch list into an array of processes
+	int lines = countlines(filename);
+	struct proc processes[lines];
+	load_dispatch(filename, &processes, lines);
+
     // Add each process structure instance to the job dispatch list queue
 
     // Iterate through each item in the job dispatch list, add each process
