@@ -95,4 +95,5 @@ void load_dispatch(char *dispatchlist, node_t *queue)
 								&processes[processIndex].numModems, &processes[processIndex].numCDs);
 		}
 	
+	}
 }

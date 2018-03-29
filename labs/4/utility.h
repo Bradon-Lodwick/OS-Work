@@ -13,11 +13,11 @@
 // Resources structure containing integers for each resource constraint and an
 // array of 1024 for the memory
 typedef struct {
-	int printer = 2;
-	int scanner = 1;
-	int modem = 1;
-	int CD = 2;
-	int MEMORY[1024] = {0};
+	int printer;
+	int scanner;
+	int modem;
+	int CD;
+	int memory[MEMORY];
 } resources;
 
 
