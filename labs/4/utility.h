@@ -34,7 +34,7 @@ typedef struct {
 	int numModems;
 	int numCDs;
 	int memPointer;
-} process;
+} proc;
 
 
 // Include your relevant functions declarations here they must start with the 
@@ -55,8 +55,4 @@ typedef struct {
 // extern void load_dispatch(char *dispatch_file, node_t *queue);
 
 
-<<<<<<< HEAD
-endif /* UTILITY_H_ */
-=======
 #endif /* UTILITY_H_ */
->>>>>>> 6012c8f64de17e6349e451f33530e248bcc388ac
