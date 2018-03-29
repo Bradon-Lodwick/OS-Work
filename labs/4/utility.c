@@ -56,7 +56,43 @@ int free_mem(resources res, int index, int size)
 	return 1;
 }
 
-//void load_dispatch(char *dispatch_file, node_t *queue)
-//{
-//	
-//}
+int countlines(char *file) {
+	FILE *fp = fopen(file, "r");
+	int ch = 0;
+	int lines = 0;
+	if (fp == NULL) {
+		printf("error counting lines: can't open file");
+		return -1;
+	}
+	else {
+		lines++;
+		while(!feof(fp)) {
+			ch = fgetc(fp);
+				if (ch == '\n') {
+					lines++;
+				}
+		}
+		return lines;
+	}
+};
+
+void load_dispatch(char *dispatchlist, node_t *queue)
+{
+	// Count the number of lines in the dispatchlist
+	int lines = countlines(filename);
+
+	if (dispatchlist == NULL) {
+		printf("Error opening dispatchlist\n");
+		return -1;
+	}
+	else {
+		struct process processes[lines];
+		int processIndex;
+		for (processIndex =0; processIndex < lines; processIndex++){
+			fscanf(dispatchlist, "%d, %d, %d, %d, %d, %d, %d, %d\n", 
+								&processes[processIndex].arrivalTime, &processes[processIndex].priority, &processes[processIndex].processorTime, 
+								&processes[processIndex].mBytes, &processes[processIndex].numPrinters, &processes[processIndex].numScanners, 
+								&processes[processIndex].numModems, &processes[processIndex].numCDs);
+		}
+	
+}
