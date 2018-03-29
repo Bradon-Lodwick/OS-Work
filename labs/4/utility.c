@@ -31,8 +31,10 @@ int alloc_mem(resources res, int size)
 					break;
 				}
 			}
+			//if the entiner block is clear
 			if(BlockFound == 1)
 			{
+				//allocate the memory
 				for(j=i;(j-i) < size;j++)
 				{
 					res.MEMORY[j] = 1;
@@ -44,11 +46,17 @@ int alloc_mem(resources res, int size)
 	return -1;
 }
 
-// free_mem(resources res, int index, int size)
-// {
-//      ...
-// }
+int free_mem(resources res, int index, int size)
+{
+	int i;
+	for (i=index;i < size;i++)
+	{
+		res.MEMORY[index+i] = 0;
+	}
+	return 1;
+}
 
-// void load_dispatch(char *dispatch_file, node_t *queue)
-// {//      ...
-// }
+//void load_dispatch(char *dispatch_file, node_t *queue)
+//{
+//	
+//}

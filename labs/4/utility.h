@@ -25,6 +25,14 @@ typedef struct {
 // input file, should also include the memory address (an index) which indicates
 // where in the resources memory array its memory was allocated
 typedef struct {
+	int arrival_time;
+	int priority;
+	int processor_time;
+	int Memsize;
+	int Rprinters;
+	int Rscanners;
+	int Rmodems;
+	int Rcds;
 } process;
 
 
