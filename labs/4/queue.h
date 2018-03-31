@@ -22,9 +22,9 @@ typedef struct NODE{
 // Add a new process to the queue, returns the address of the next node added
 // to the linked list
 
-extern node_t *push(struct proc newProcess);
+extern node_t *push(int level, struct proc newProcess);
 
-extern node_t *pop();
+extern node_t *pop(int level);
 
 
 #endif /* QUEUE_H_ */
