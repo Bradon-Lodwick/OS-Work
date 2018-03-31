@@ -35,6 +35,7 @@ typedef struct proc{
 	int numModems;
 	int numCDs;
 	int memPointer;
+	pid_t pid;
 } proc;
 
 

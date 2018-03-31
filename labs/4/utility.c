@@ -56,6 +56,24 @@ int free_mem(resources res, int index, int size)
 	return 1;
 }
 
+#if 1 is returned then there are enough resources available
+int check_res(resources res, proc P)
+{
+	#if the process requires more printers then available
+	if (P.numPrinters > res.printer){return 0;}
+	if (P.numScanners > res.scanner){return 0;}
+	if (P.numModems > res.modem){return 0;}
+	if (P.numCDs > res.modem){return 0;}
+	return 1;
+}
+
+void alloc_res(resources res, proc P)
+{
+	res.printer -= P.numPrinters;
+	res.scanner -= P.numScanners;
+	res.modem -= P.numModems;
+	res.CD -= P.numCDs;
+}
 int countlines(char *file) {
 	FILE *fp = fopen(file, "r");
 	int ch = 0;
