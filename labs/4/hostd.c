@@ -51,9 +51,9 @@ int main(int argc, char *argv[])
 	int RealTimeRunning = 0; node_t * RealTimeNode;
 	int memP = -1;
 	int run = lines;
-	node_t * tempProc; note_t * RealProc;
-	node_t * Priority_1; note_t * Priority_2; node_t * Priority_3;
-	note_t * Realtime; node_t * UserJob;
+	node_t * tempProc; node_t * RealProc;
+	node_t * Priority_1; node_t * Priority_2; node_t * Priority_3;
+	node_t * Realtime; node_t * UserJob;
 	while(run > 0)
 	{
 		for (i=0;i < lines;i++)
@@ -70,24 +70,24 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					push(&UserJob, processes[i])
+					push(&UserJob, processes[i]);
 				}
 			}
 		}
 		
 		//first iterate through the realtime queue looking for the first process with enough free resources and fork into it	
 		//this is because realtime processes have priority over resources
-		RealProc =&Realtime
-		while((RealProc->Next != NULL)&&(RealTimeRunning == 0))
+		RealProc = &Realtime;
+		while((RealProc->next != NULL)&&(RealTimeRunning == 0))
 		{
 			if (check_res(freeres, RealProc->process) == 1)
 			{
-				memP = alloc_mem(freeres, RealProc->&process.mBytes);
+				memP = alloc_mem(freeres, RealProc->process.mBytes);
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
 					RealProc->process.memPointer = memP;
-					alloc_res(freeres, RealProc->&process);
+					alloc_res(freeres, RealProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
 					RealProc->process.pid = fork();
@@ -100,13 +100,13 @@ int main(int argc, char *argv[])
 					{
 						//parent
 						//interrupt child here
-						signal(SIGINT, RealProc->&process.pid);
+						signal(SIGINT, RealProc->process.pid);
 						RealTimeNode = remove_node(&Realtime, RealProc);
 						RealTimeRunning = 1;
 					}
 				}
 			}
-			RealProc = RealProc->Next;
+			RealProc = RealProc->next;
 		}
 		
 		
@@ -123,11 +123,11 @@ int main(int argc, char *argv[])
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
-					tempProc->process.&memPointer = memP;
+					tempProc->&process.memPointer = memP;
 					alloc_res(&freeres, tempProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
-					tempProc->*process.pid = fork();
+					tempProc->process.pid = fork();
 					if (tempProc->process.pid == 0)
 					{
 						//child
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 					{
 						//parent
 						//interrupt child here
-						signal(SIGINT, tempProc->&process.pid);
+						signal(SIGINT, tempProc->process.pid);
 					}
 				}
 			}
