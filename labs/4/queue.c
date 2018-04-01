@@ -23,7 +23,7 @@ void push(node_t * head, struct proc * newProcess)
 
 	// Loop through the list to add the node to the end
 	else{
-			node_t * current = head;
+			node_t * current = &head;
 			while (current->next != NULL)
 			{
 				current = current->next;

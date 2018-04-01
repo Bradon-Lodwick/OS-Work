@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	freeres.scanner = 1;
 	freeres.modem = 1;
 	freeres.CD = 2;
-	*freeres.memory = malloc(MEMORY * sizeof(int));
+	freeres.memory = (int *) malloc(MEMORY * sizeof(int));
 	
 	//puts all processes into the job dispatch list queue
 	int time = 0;

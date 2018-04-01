@@ -18,7 +18,7 @@ typedef struct resources{
 	int scanner;
 	int modem;
 	int CD;
-	int memory[MEMORY];
+	int *memory;
 } resources;
 
 
