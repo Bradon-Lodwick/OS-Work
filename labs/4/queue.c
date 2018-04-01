@@ -37,7 +37,9 @@ node_t * remove_node(node_t * head, node_t * node_to_remove)
 {
 	if (head == node_to_remove)
 	{
+		node_t * removed_node = *head;
 		head = head->next;
+		return removed_node;
 	}
 
 	else
@@ -46,11 +48,11 @@ node_t * remove_node(node_t * head, node_t * node_to_remove)
 		node_t * current = &head;
 		while (current->next != node_to_remove)
 		{
-			current = current->next;
 			if (current->next != NULL)
 			{
 				return NULL;
 			}
+			current = current->next;
 		}
 
 		// Node to be removed
