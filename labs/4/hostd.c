@@ -82,25 +82,25 @@ int main(int argc, char *argv[])
 		{
 			if (check_res(freeres, RealProc->process) == 1)
 			{
-				memP = alloc_mem(&freeres, RealProc->process.mBytes);
+				memP = alloc_mem(&freeres, RealProc->process->mBytes);
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
-					RealProc->process.memPointer = memP;
+					RealProc->process->memPointer = memP;
 					alloc_res(&freeres, RealProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
-					RealProc->process.pid = fork();
-					if (RealProc->process.pid == 0)
+					RealProc->process->pid = fork();
+					if (RealProc->process->pid == 0)
 					{
 						//child
-						execv("./process %d", RealProc->process.processorTime);
+						execv("./process %d", RealProc->process->processorTime);
 					}
 					else
 					{
 						//parent
 						//interrupt child here
-						signal(SIGINT, RealProc->process.pid);
+						signal(SIGINT, RealProc->process->pid);
 						RealTimeNode = remove_node(&Realtime, RealProc);
 						RealTimeRunning = 1;
 					}
@@ -123,21 +123,21 @@ int main(int argc, char *argv[])
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
-					tempProc->process.memPointer = memP;
+					tempProc->process->memPointer = memP;
 					alloc_res(&freeres, tempProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
-					tempProc->process.pid = fork();
-					if (tempProc->process.pid == 0)
+					tempProc->process->pid = fork();
+					if (tempProc->process->pid == 0)
 					{
 						//child
-						execv("./process %d", tempProc->process.processorTime);
+						execv("./process %d", tempProc->process->processorTime);
 					}
 					else
 					{
 						//parent
 						//interrupt child here
-						signal(SIGINT, tempProc->process.pid);
+						signal(SIGINT, tempProc->process->pid);
 					}
 				}
 			}
@@ -155,39 +155,39 @@ int main(int argc, char *argv[])
 		node_t * P3 = remove_node(&Priority_3, Priority_3);
 		
 		//resume each of those popped heads, sleep for 1 second, then pause them again
-		signal(SIGCONT, P1->process.pid);
-		signal(SIGCONT, P2->process.pid);
-		signal(SIGCONT, P3->process.pid);
+		signal(SIGCONT, P1->process->pid);
+		signal(SIGCONT, P2->process->pid);
+		signal(SIGCONT, P3->process->pid);
 		
-		signal(SIGCONT, RealTimeNode->process.pid);
+		signal(SIGCONT, RealTimeNode->process->pid);
 
-		P1->process.processorTime -= 1; P2->process.processorTime -= 1; P3->process.processorTime -= 1;
-		RealTimeNode->process.processorTime -= 1;
+		P1->process->processorTime -= 1; P2->process->processorTime -= 1; P3->process->processorTime -= 1;
+		RealTimeNode->process->processorTime -= 1;
 		sleep(1);
-		signal(SIGTSTP, P1->process.pid);
-		signal(SIGTSTP, P2->process.pid);
-		signal(SIGTSTP, P3->process.pid);
-		signal(SIGTSTP, RealTimeNode->process.pid);
+		signal(SIGTSTP, P1->process->pid);
+		signal(SIGTSTP, P2->process->pid);
+		signal(SIGTSTP, P3->process->pid);
+		signal(SIGTSTP, RealTimeNode->process->pid);
 		//check if any of the processes have completed their runtime
-		if (P1->process.processorTime > 0)
+		if (P1->process->processorTime > 0)
 		{
 			push(&Priority_2, &P1->process);
-		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1->process.memPointer, P1->process.mBytes);}
+		}else{ signal(SIGINT,P1->process->pid); run++; free_mem(freeres, P1->process->memPointer, P1->process->mBytes);}
 		if (P2->process.processorTime > 0)
 		{
 			push(&Priority_3, &P2->process);
-		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2->process.memPointer, P2->process.mBytes);}
+		}else { signal(SIGINT,P2->process->pid); run++; free_mem(freeres, P2->process->memPointer, P2->process->mBytes);}
 		if(P3->process.processorTime > 0)
 		{
 			push(&Priority_3, &P3->process);
-		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3->process.memPointer, P3->process.mBytes);}
+		}else { signal(SIGINT,P3->process->pid); run++; free_mem(freeres, P3->process->memPointer, P3->process->mBytes);}
 		
-		if(RealTimeNode->process.processorTime == 0)
+		if(RealTimeNode->process->processorTime == 0)
 		{
 			RealTimeRunning = 0;
-			signal(SIGINT, RealTimeNode->process.pid);
+			signal(SIGINT, RealTimeNode->process->pid);
 			run++;
-			free_mem(freeres, RealTimeNode->process.memPointer, RealTimeNode->process.mBytes);
+			free_mem(freeres, RealTimeNode->process->memPointer, RealTimeNode->process->mBytes);
 		}
 
 		time++;
