@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
-					tempProc->&process.memPointer = memP;
+					tempProc->process.memPointer = memP;
 					alloc_res(&freeres, tempProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 			{
 				//resources couldn't be allocated
 			}
-			tempProc = tempProc->next
+			tempProc = tempProc->next;
 		}while(tempProc != NULL);
 		
 		//Now we can finally execute one time segment for the user jobs
@@ -171,23 +171,23 @@ int main(int argc, char *argv[])
 		//check if any of the processes have completed their runtime
 		if (P1->process.processorTime > 0)
 		{
-			push(&Priority_2, P1);
-		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1.memPointer, P1.mBytes)}
+			push(&Priority_2, P1->process);
+		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1->process.memPointer, P1->process.mBytes)}
 		if (P2->process.processorTime > 0)
 		{
-			push(&Priority_3, P2);
-		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2.memPointer, P2.mBytes)}
+			push(&Priority_3, P2->process);
+		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2->process.memPointer, P2->process.mBytes)}
 		if(P3->process.processorTime > 0)
 		{
-			push(&Priority_3, P3);
-		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3.memPointer, P3.mBytes)}
+			push(&Priority_3, P3->process);
+		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3->process.memPointer, P3->process.mBytes)}
 		
 		if(RealTimeNode->process.processorTime == 0)
 		{
 			RealTimeRunning = 0;
 			signal(SIGINT, RealTimeNode->process.pid);
 			run++;
-			free_mem(freeres, RealTimeNode.memPointer, RealTimeNode.mBytes);
+			free_mem(freeres, RealTimeNode->process.memPointer, RealTimeNode->process.mBytes);
 		}
 
 		time++;
