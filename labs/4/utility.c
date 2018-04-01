@@ -18,13 +18,13 @@ int alloc_mem(resources * res, int size)
 	int BlockFound = 0;
 	for (i=0;i<1024;i++)
 	{
-		if(res.memory[i] == 0)
+		if(res->memory[i] == 0)
 		{
 			BlockFound = 1;
 			for(j=i;(j-i) < size;j++)
 			{
 				//if the scanned block has an allocated spot
-				if (res.memory[j] == 1)
+				if (res->memory[j] == 1)
 				{
 					i=j;
 					BlockFound = 0;
@@ -37,7 +37,7 @@ int alloc_mem(resources * res, int size)
 				//allocate the memory
 				for(j=i;(j-i) < size;j++)
 				{
-					res.memory[j] = 1;
+					res->memory[j] = 1;
 				}
 				return i;
 			}
@@ -51,15 +51,15 @@ int free_mem(resources * res, int index, int size)
 	int i;
 	for (i=index;i < size;i++)
 	{
-		res.memory[index+i] = 0;
+		res->memory[index+i] = 0;
 	}
 	return 1;
 }
 
-#if 1 is returned then there are enough resources available
+//if 1 is returned then there are enough resources available
 int check_res(resources res, proc P)
 {
-	#if the process requires more printers then available
+	//if the process requires more printers then available
 	if (P.numPrinters > res.printer){return 0;}
 	if (P.numScanners > res.scanner){return 0;}
 	if (P.numModems > res.modem){return 0;}
