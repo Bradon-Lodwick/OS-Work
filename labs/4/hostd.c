@@ -172,15 +172,15 @@ int main(int argc, char *argv[])
 		if (P1->process.processorTime > 0)
 		{
 			push(&Priority_2, P1->process);
-		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1->process.memPointer, P1->process.mBytes)}
+		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1->process.memPointer, P1->process.mBytes);}
 		if (P2->process.processorTime > 0)
 		{
 			push(&Priority_3, P2->process);
-		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2->process.memPointer, P2->process.mBytes)}
+		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2->process.memPointer, P2->process.mBytes);}
 		if(P3->process.processorTime > 0)
 		{
 			push(&Priority_3, P3->process);
-		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3->process.memPointer, P3->process.mBytes)}
+		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3->process.memPointer, P3->process.mBytes);}
 		
 		if(RealTimeNode->process.processorTime == 0)
 		{
