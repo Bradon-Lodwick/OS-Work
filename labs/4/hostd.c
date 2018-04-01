@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	//puts all processes into the job dispatch list queue
 	int time = 0;
 	int RealTimeRunning = 0; node_t * RealTimeNode;
-	int memP = -1;
+	int * memP = -1;
 	int run = lines;
 	node_t * tempProc; node_t * RealProc;
 	node_t * Priority_1; node_t * Priority_2; node_t * Priority_3;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
-					RealProc->process->memPointer = memP;
+					RealProc->process->memPointer = &memP;
 					alloc_res(&freeres, RealProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 					if (tempProc->process->pid == 0)
 					{
 						//child
-						execv("./process %d", tempProc->process->processorTime);
+						execv("process", tempProc->process->processorTime);
 					}
 					else
 					{
