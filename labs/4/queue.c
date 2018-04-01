@@ -60,5 +60,6 @@ node_t * remove_node(node_t * head, node_t * node_to_remove)
 		current->next = removed_node->next;
 
 		return removed_node;
+	}
 }
 
