@@ -17,10 +17,18 @@ process : sigtrap.o
 hostd : hostd.o utility.o queue.o
 	$(CC) $(CFLAGS) $^ $(LIBS) -o $@ 
 
+process_nw : sigtrap.o
+	$(CC) $(CFLAGS) -w $^ $(LIBS) -o $@ 
+
+hostd_nw : hostd.o utility.o queue.o
+	$(CC) $(CFLAGS) -w $^ $(LIBS) -o $@ 
+
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< 
 
 all : $(EXE)
+
+all_nw : $(EXE)
 
 clean:
 	rm -f $(OBJECTS) $(EXE) *~

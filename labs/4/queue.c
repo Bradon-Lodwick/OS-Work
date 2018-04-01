@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "queue.h"
 
+// Pushes a node to the given queue defined by the head
 void push(node_t * head, struct proc newProcess)
 {
 	// The new node to be added to the queue
@@ -31,25 +32,33 @@ void push(node_t * head, struct proc newProcess)
 	}
 }
 
+// Removes the given node from the queue defined by the given head
 node_t * remove_node(node_t * head, node_t * node_to_remove)
 {
-	// Current node in iteration
-	node_t * current = head;
-	while (current->next != node_to_remove)
+	if (head == node_to_remove)
 	{
-		current = current->next;
-		if (current->next != NULL)
-		{
-			return NULL;
-		}
+		head = head->next;
 	}
 
-	// Node to be removed
-	node_t * removed_node = current->next;
+	else
+	{
+		// Current node in iteration
+		node_t * current = head;
+		while (current->next != node_to_remove)
+		{
+			current = current->next;
+			if (current->next != NULL)
+			{
+				return NULL;
+			}
+		}
 
-	// Remove node by setting the next of the node before to the deleted node's next
-	current->next = removed_node->next;
+		// Node to be removed
+		node_t * removed_node = current->next;
 
-	return removed_node;
+		// Remove node by setting the next of the node before to the deleted node's next
+		current->next = removed_node->next;
+
+		return removed_node;
 }
 
