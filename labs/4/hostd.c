@@ -48,9 +48,12 @@ int main(int argc, char *argv[])
 	
 	//puts all processes into the job dispatch list queue
 	int time = 0;
+	int RealTimeRunning = 0; node_t * RealTimeNode;
 	int memP = -1;
 	int run = lines;
-	node_t * tempProc;
+	node_t * tempProc; note_t * RealProc;
+	node_t * Priority_1; note_t * Priority_2; node_t * Priority_3;
+	note_t * Realtime; node_t * UserJob;
 	while(run > 0)
 	{
 		for (i=0;i < lines;i++)
@@ -63,39 +66,68 @@ int main(int argc, char *argv[])
 				//or the user job queue
 				if (processes[i].priority == 0)
 				{
-					push(0, processes[i]);
+					push(&Realtime, processes[i]);
 				}
 				else
 				{
-					push(4, processes[i]);
+					push(&UserJob, processes[i])
 				}
 			}
 		}
 		
-		//TODO: THIS PART (REALTIME STUFF)
-		//first iterate through the realtime queue looking for the first process
-		//with enough free resources and fork into it	
+		//first iterate through the realtime queue looking for the first process with enough free resources and fork into it	
 		//this is because realtime processes have priority over resources
-		
-		
-		
-		//iterate through user job queue for the same reason
-		for(...)
+		RealProc =&Realtime
+		while((RealProc->Next != NULL)&&(RealTimeRunning == 0))
 		{
-			tempProc = pop(4);
+			if (check_res(freeres, RealProc->process) == 1)
+			{
+				memP = alloc_mem(freeres, RealProc->&process.mBytes);
+				if(memP > 0)
+				{
+					//save the pointer to memory to process, and allocate resources
+					RealProc->process.memPointer = memP;
+					alloc_res(freeres, RealProc->&process);
+					//put the process in the correct queue based on its priority
+					//also fork it and immediately pause it
+					RealProc->process.pid = fork();
+					if (RealProc->process.pid == 0)
+					{
+						//child
+						execv("./process %d", RealProc->process.processorTime);
+					}
+					else
+					{
+						//parent
+						//interrupt child here
+						signal(SIGINT, RealProc->&process.pid);
+						RealTimeNode = remove_node(&Realtime, RealProc);
+						RealTimeRunning = 1;
+					}
+				}
+			}
+			RealProc = RealProc->Next;
+		}
+		
+		
+		
+		tempProc = &UserJob;
+		//iterate through user job queue for the same reason as above
+		do 
+		{
 			//if theres enough free resources
 			if (check_res(freeres, tempProc->process) == 1)
 			{
 				//if theres enough free memory it will be allocated
-				memP = alloc_mem(freeres, tempProc->process.mBytes);
+				memP = alloc_mem(&freeres, tempProc->process.mBytes);
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
-					tempProc->process.memPointer = memP;
-					alloc_res(freeres, tempProc->process);
+					tempProc->process.&memPointer = memP;
+					alloc_res(&freeres, tempProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
-					tempProc->process.pid = fork();
+					tempProc->*process.pid = fork();
 					if (tempProc->process.pid == 0)
 					{
 						//child
@@ -113,38 +145,50 @@ int main(int argc, char *argv[])
 			{
 				//resources couldn't be allocated
 			}
-		}
+			tempProc = tempProc->next
+		}while(tempProc != NULL);
 		
 		//Now we can finally execute one time segment for the user jobs
 		//Pop the head in each of the priority 1-3 queues and enqueue that to the lower priority
-		node_t * P1 = pop(1);
-		node_t * P2 = pop(2);
-		node_t * P3 = pop(3);
+		node_t * P1 = remove_node(&Priority_1, Priority_1);
+		node_t * P2 = remove_node(&Priority_2, Priority_2);
+		node_t * P3 = remove_node(&Priority_3, Priority_3);
 		
 		//resume each of those popped heads, sleep for 1 second, then pause them again
 		signal(SIGCONT, P1->process.pid);
 		signal(SIGCONT, P2->process.pid);
 		signal(SIGCONT, P3->process.pid);
+		
+		signal(SIGCONT, RealTimeNode->process.pid);
+
 		P1->process.processorTime -= 1; P2->process.processorTime -= 1; P3->process.processorTime -= 1;
+		RealTimeNode->process.processorTime -= 1;
 		sleep(1);
 		signal(SIGTSTP, P1->process.pid);
 		signal(SIGTSTP, P2->process.pid);
 		signal(SIGTSTP, P3->process.pid);
+		signal(SIGTSTP, RealTimeNode->process.pid);
+		//check if any of the processes have completed their runtime
 		if (P1->process.processorTime > 0)
 		{
-			push(2, P1);
-		}else{ signal(SIGINT,P1->process.pid); run++;}
+			push(&Priority_2, P1);
+		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1.memPointer, P1.mBytes)}
 		if (P2->process.processorTime > 0)
 		{
-			push(3, P2);
-		}else { signal(SIGINT,P2->process.pid); run++;}
-
+			push(&Priority_3, P2);
+		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2.memPointer, P2.mBytes)}
 		if(P3->process.processorTime > 0)
 		{
-			push(3, P3);
-		}else { signal(SIGINT,P3->process.pid); run++;}
-
+			push(&Priority_3, P3);
+		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3.memPointer, P3.mBytes)}
 		
+		if(RealTimeNode->process.processorTime == 0)
+		{
+			RealTimeRunning = 0;
+			signal(SIGINT, RealTimeNode->process.pid);
+			run++;
+			free_mem(freeres, RealTimeNode.memPointer, RealTimeNode.mBytes);
+		}
 
 		time++;
 	}

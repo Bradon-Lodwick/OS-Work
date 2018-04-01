@@ -11,7 +11,7 @@
 
 // Define your utility functions here, you will likely need to add more...
 
-int alloc_mem(resources res, int size)
+int alloc_mem(resources * res, int size)
 {
 	int i=0;
 	int j;
@@ -46,7 +46,7 @@ int alloc_mem(resources res, int size)
 	return -1;
 }
 
-int free_mem(resources res, int index, int size)
+int free_mem(resources * res, int index, int size)
 {
 	int i;
 	for (i=index;i < size;i++)
