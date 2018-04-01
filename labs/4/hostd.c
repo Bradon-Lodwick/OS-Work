@@ -66,11 +66,11 @@ int main(int argc, char *argv[])
 				//or the user job queue
 				if (processes[i].priority == 0)
 				{
-					push(&Realtime, processes[i]);
+					push(&Realtime, &processes[i]);
 				}
 				else
 				{
-					push(&UserJob, processes[i]);
+					push(&UserJob, &processes[i]);
 				}
 			}
 		}
@@ -171,15 +171,15 @@ int main(int argc, char *argv[])
 		//check if any of the processes have completed their runtime
 		if (P1->process.processorTime > 0)
 		{
-			push(&Priority_2, P1->process);
+			push(&Priority_2, &P1->process);
 		}else{ signal(SIGINT,P1->process.pid); run++; free_mem(freeres, P1->process.memPointer, P1->process.mBytes);}
 		if (P2->process.processorTime > 0)
 		{
-			push(&Priority_3, P2->process);
+			push(&Priority_3, &P2->process);
 		}else { signal(SIGINT,P2->process.pid); run++; free_mem(freeres, P2->process.memPointer, P2->process.mBytes);}
 		if(P3->process.processorTime > 0)
 		{
-			push(&Priority_3, P3->process);
+			push(&Priority_3, &P3->process);
 		}else { signal(SIGINT,P3->process.pid); run++; free_mem(freeres, P3->process.memPointer, P3->process.mBytes);}
 		
 		if(RealTimeNode->process.processorTime == 0)

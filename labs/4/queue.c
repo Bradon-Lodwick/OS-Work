@@ -10,11 +10,11 @@
 #include "queue.h"
 
 // Pushes a node to the given queue defined by the head
-void push(node_t * head, struct proc newProcess)
+void push(node_t * head, struct proc * newProcess)
 {
 	// The new node to be added to the queue
 	node_t * newNode = (node_t*) malloc(sizeof(node_t));
-	newNode->process = newProcess;
+	newNode->process = *newProcess;
 
 	// If head is null, make the head equal to the new node
 	if (head == NULL){
