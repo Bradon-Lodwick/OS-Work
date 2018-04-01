@@ -24,7 +24,7 @@ typedef struct NODE{
 
 extern void push(node_t * head, struct proc newProcess);
 
-extern node_t *remove_index(node_t * head, int index);
+extern node_t * remove_index(node_t * head, int index);
 
 
 #endif /* QUEUE_H_ */

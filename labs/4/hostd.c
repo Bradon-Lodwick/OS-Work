@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	freeres.scanner = 1;
 	freeres.modem = 1;
 	freeres.CD = 2;
-	freeres.memory = malloc(MEMORY * sizeof(int));
+	*freeres.memory = malloc(MEMORY * sizeof(int));
 	
 	//puts all processes into the job dispatch list queue
 	int time = 0;
@@ -82,12 +82,12 @@ int main(int argc, char *argv[])
 		{
 			if (check_res(freeres, RealProc->process) == 1)
 			{
-				memP = alloc_mem(freeres, RealProc->process.mBytes);
+				memP = alloc_mem(&freeres, RealProc->process.mBytes);
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
 					RealProc->process.memPointer = memP;
-					alloc_res(freeres, RealProc->process);
+					alloc_res(&freeres, RealProc->process);
 					//put the process in the correct queue based on its priority
 					//also fork it and immediately pause it
 					RealProc->process.pid = fork();

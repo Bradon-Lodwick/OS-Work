@@ -67,12 +67,12 @@ int check_res(resources res, proc P)
 	return 1;
 }
 
-void alloc_res(resources res, proc P)
+void alloc_res(resources * res, proc P)
 {
-	res.printer -= P.numPrinters;
-	res.scanner -= P.numScanners;
-	res.modem -= P.numModems;
-	res.CD -= P.numCDs;
+	res->printer -= P.numPrinters;
+	res->scanner -= P.numScanners;
+	res->modem -= P.numModems;
+	res->CD -= P.numCDs;
 }
 int countlines(char *file) {
 	FILE *fp = fopen(file, "r");
