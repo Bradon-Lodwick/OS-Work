@@ -9,98 +9,47 @@
 #include <stdlib.h>
 #include "queue.h"
 
-// Define your FIFO queue functions here, these will most likely be the
-// push and pop functions that you declared in your header file
-
-node_t first_0;
-node_t last_0;
-node_t first_1;
-node_t last_1;
-node_t first_2;
-node_t last_2;
-node_t first_3;
-node_t last_3;
-
-node_t *push(int level, struct proc newProcess)
-{	
-	node_t *first;
-	node_t *last;
-	if (level == 0) {
-		first = &first_0;
-		last = &last_0;
-	}
-	else if (level == 1) {
-		first = &first_1;
-		last = &last_1;
-
-	}
-	else if (level == 2) {
-		first = &first_2;
-		last = &last_2;
-
-	}
-	else if (level == 3) {
-		first = &first_3;
-		last = &last_3;
-
-	}
-	else{
-		printf("invalid priority level");
-		return 0;
-	}
-
-	node_t *newNode = (node_t*) malloc(sizeof(node_t));
+void push(node_t * head, struct proc newProcess)
+{
+	// The new node to be added to the queue
+	node_t * newNode = (node_t*) malloc(sizeof(node_t));
 	newNode->process = newProcess;
 
-	if (first == NULL) {
-		first = newNode;
-		last = newNode;
+	// If head is null, make the head equal to the new node
+	if (head == NULL){
+		head = newNode;
 	}
 
-	else {
-		last->next = newNode;
-		last = newNode;
+	// Loop through the list to add the node to the end
+	else{
+			node_t * current = head;
+			while (current->next != NULL)
+			{
+				current = current->next;
+			}
+			current->next = newNode;
 	}
-	free(newNode);
 }
 
-node_t *pop(int level)
+node_t * remove_node(node_t * head, node_t * node_to_remove)
 {
-	node_t *first;
-	node_t *last;
-	if (level == 0) {
-		first = &first_0;
-		last = &last_0;
-	}
-	else if (level == 1) {
-		first = &first_1;
-		last = &last_1;
-
-	}
-	else if (level == 2) {
-		first = &first_2;
-		last = &last_2;
-
-	}
-	else if (level == 3) {
-		first = &first_3;
-		last = &last_3;
-
-	}
-	else{
-		printf("invalid priority level");
-		return 0;
+	// Current node in iteration
+	node_t * current = head;
+	while (current->next != node_to_remove)
+	{
+		current = current->next;
+		if (current->next != NULL)
+		{
+			return NULL;
+		}
 	}
 
+	// Node to be removed
+	node_t * removed_node = current->next;
 
-	if (first != NULL) {
-		node_t *poppedNode = (node_t*) malloc(sizeof(node_t));
-		poppedNode = first;
-		first = first->next;
-		return poppedNode;
-	}
-	else {
-		return NULL;
-	}
+	// Remove node by setting the next of the node before to the deleted node's next
+	current->next = removed_node->next;
+
+	return removed_node;
 }
 
