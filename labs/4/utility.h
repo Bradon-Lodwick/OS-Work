@@ -26,15 +26,15 @@ typedef struct resources{
 // input file, should also include the memory address (an index) which indicates
 // where in the resources memory array its memory was allocated
 typedef struct proc{
-	int arrivalTime;
-	int priority;
-	int processorTime;
-	int mBytes;
-	int numPrinters;
-	int numScanners;
-	int numModems;
-	int numCDs;
-	int memPointer;
+	int * arrivalTime;
+	int * priority;
+	int * processorTime;
+	int * mBytes;
+	int * numPrinters;
+	int * numScanners;
+	int * numModems;
+	int * numCDs;
+	int * memPointer;
 	pid_t pid;
 } proc;
 
