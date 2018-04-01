@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 						//parent
 						//interrupt child here
 						signal(SIGINT, RealProc->process->pid);
-						RealTimeNode = remove_node(&Realtime, RealProc);
+						RealTimeNode = remove_node(&Realtime, &RealProc);
 						RealTimeRunning = 1;
 					}
 				}
@@ -116,10 +116,10 @@ int main(int argc, char *argv[])
 		do 
 		{
 			//if theres enough free resources
-			if (check_res(freeres, tempProc->process) == 1)
+			if (check_res(freeres, tempProc->process) == 1 && UserJob != NULL)
 			{
 				//if theres enough free memory it will be allocated
-				memP = alloc_mem(&freeres, tempProc->process.mBytes);
+				memP = alloc_mem(&freeres, tempProc->process->mBytes);
 				if(memP > 0)
 				{
 					//save the pointer to memory to process, and allocate resources
@@ -150,9 +150,9 @@ int main(int argc, char *argv[])
 		
 		//Now we can finally execute one time segment for the user jobs
 		//Pop the head in each of the priority 1-3 queues and enqueue that to the lower priority
-		node_t * P1 = remove_node(&Priority_1, Priority_1);
-		node_t * P2 = remove_node(&Priority_2, Priority_2);
-		node_t * P3 = remove_node(&Priority_3, Priority_3);
+		node_t * P1 = remove_node(&Priority_1, &Priority_1);
+		node_t * P2 = remove_node(&Priority_2, &Priority_2);
+		node_t * P3 = remove_node(&Priority_3, &Priority_3);
 		
 		//resume each of those popped heads, sleep for 1 second, then pause them again
 		signal(SIGCONT, P1->process->pid);
@@ -173,11 +173,11 @@ int main(int argc, char *argv[])
 		{
 			push(&Priority_2, &P1->process);
 		}else{ signal(SIGINT,P1->process->pid); run++; free_mem(freeres, P1->process->memPointer, P1->process->mBytes);}
-		if (P2->process.processorTime > 0)
+		if (P2->process->processorTime > 0)
 		{
 			push(&Priority_3, &P2->process);
 		}else { signal(SIGINT,P2->process->pid); run++; free_mem(freeres, P2->process->memPointer, P2->process->mBytes);}
-		if(P3->process.processorTime > 0)
+		if(P3->process->processorTime > 0)
 		{
 			push(&Priority_3, &P3->process);
 		}else { signal(SIGINT,P3->process->pid); run++; free_mem(freeres, P3->process->memPointer, P3->process->mBytes);}

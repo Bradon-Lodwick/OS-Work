@@ -14,7 +14,7 @@ void push(node_t * head, struct proc * newProcess)
 {
 	// The new node to be added to the queue
 	node_t * newNode = (node_t*) malloc(sizeof(node_t));
-	newNode->process = *newProcess;
+	newNode->process = newProcess;
 
 	// If head is null, make the head equal to the new node
 	if (head == NULL){
@@ -43,7 +43,7 @@ node_t * remove_node(node_t * head, node_t * node_to_remove)
 	else
 	{
 		// Current node in iteration
-		node_t * current = head;
+		node_t * current = &head;
 		while (current->next != node_to_remove)
 		{
 			current = current->next;
@@ -57,7 +57,7 @@ node_t * remove_node(node_t * head, node_t * node_to_remove)
 		node_t * removed_node = current->next;
 
 		// Remove node by setting the next of the node before to the deleted node's next
-		current->next = removed_node->next;
+		current->next = &removed_node->next;
 
 		return removed_node;
 	}
