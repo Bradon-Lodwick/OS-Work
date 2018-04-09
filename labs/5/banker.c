@@ -31,6 +31,15 @@ int allocation[NUM_CUSTOMERS][NUM_RESOURCES];
 // Remaining need of each customer
 int need[NUM_CUSTOMERS][NUM_RESOURCES];
 
+// The lock to be used by the threads
+pthread_mutex_t lock;
+
+// Test function for testing the threads, TODO can be removed after testing complete
+void* test(void *arg)
+{
+	printf("thread created\n");
+}
+
 
 //allocates the required resources
 void alloc_res(int n_cust, int req[])
@@ -116,8 +125,38 @@ int main(int argc, char *argv[])
     // Allocate the available resources
 
     // Initialize the pthreads, locks, mutexes, etc.
+	// Initializes the mutex lock
+	if (pthread_mutex_init(&lock, NULL) != 0)
+	{
+		printf("Mutex init failed\n");
+		return 1;
+	}
+	// Create the array of threads
+	pthread_t * threads = malloc(sizeof(pthread_t) * NUM_CUSTOMERS);
 
     // Run the threads and continually loop
+	while (true)
+	{
+		// Create the threads
+		int thread;
+		int result;
+		for (thread = 0; thread < NUM_CUSTOMERS; thread++)
+		{
+			// Creates the thread TODO change to actual function
+			result = pthread_create(&threads[thread], NULL, &test, NULL);
+			if (result != 0)
+			{
+				printf("Error creating the threads.\n");
+				exit(-1);
+			}
+		}
+
+		// Join all the threads	
+		for (thread = 0; thread < NUM_CUSTOMERS; thread++)
+		{
+			pthread_join(threads[thread], NULL);
+		}
+	}
 
     // The threads will request and then release random numbers of resources
 
