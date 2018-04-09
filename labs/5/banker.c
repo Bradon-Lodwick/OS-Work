@@ -50,6 +50,22 @@ int main(int argc, char *argv[])
     // ==================== YOUR CODE HERE ==================== //
 
     // Read in arguments from CLI, NUM_RESOURCES is the number of arguments   
+	// Checks to make sure proper number of arguments were given
+	if (argc != NUM_RESOURCES + 1)
+	{
+		printf("Invalid number of arguments. Please give %d arguments\n", NUM_RESOURCES + 1);
+		exit(-1);
+
+	}
+	// Put available resources into the available array
+	else
+	{
+		int i;
+		for (i = 1; i <= NUM_RESOURCES; i++)
+		{
+			available[i - 1] = atoi(argv[i]);
+		}
+	}
     
     // Allocate the available resources
 
