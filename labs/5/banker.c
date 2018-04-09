@@ -32,17 +32,63 @@ int allocation[NUM_CUSTOMERS][NUM_RESOURCES];
 int need[NUM_CUSTOMERS][NUM_RESOURCES];
 
 
+//allocates the required resources
+void alloc_res(int n_cust, int req[])
+{	
+	int j;
+	for (j=0;j<NUM_RESOURCES;j++)
+	{
+		available[j] = available[j] - req[j];
+		allocation[n_cust][j] = allocation[n_cost][j] + req[j];
+		need[n_cust][j] = need[n_cust][j] - req[j]
+	}
+}
+
+
 // Define functions declared in banker.h here
-// bool request_res(int n_customer, int request[])
-// {
-//      ...
-// }
+bool request_res(int n_customer, int request[])
+{
+	int i;
+	for (i=0;i<NUM_RESOURCES;i++)
+	{
+		if (request[i] <= need[n_customer][i])
+		{
+			//do nothing, so far its good
+		}
+		else
+		{
+			//TODO: RAISE ERROR CONDITION
+			return false;
+		}
+	}
+	for (i=0;i<NUM_RESOURCES;i++)
+	{
+		if (request[i] <= Available)
+		{
+			//do nothing again, so far its good
+		}
+		else
+		{
+			//Process must wait
+			return false;
+		}
+	}
+	alloc_res(n_customer, request[])
+	return true;
+}
 
 // Release resources, returns true if successful
-// bool release_res(int n_customer, int release[])
-// {
-//      ...
-// }
+bool release_res(int n_customer, int release[])
+{
+	int j;
+	for (j=0;j<NUM_RESOURCES;j++)
+	{
+		available[j] = available[j] + release[j];
+		allocation[n_customer][j] = allocation[n_cust][j]  - release[j];
+		need[n_customer][j] = need[n_customer][j] + release[j];
+	}
+	return true;
+}
 
 
 int main(int argc, char *argv[])
