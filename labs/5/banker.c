@@ -48,9 +48,99 @@ void alloc_res(int n_cust, int req[])
 	for (j=0;j<NUM_RESOURCES;j++)
 	{
 		available[j] = available[j] - req[j];
-		allocation[n_cust][j] = allocation[n_cost][j] + req[j];
-		need[n_cust][j] = need[n_cust][j] - req[j]
+		allocation[n_cust][j] = allocation[n_cust][j] + req[j];
+		need[n_cust][j] = need[n_cust][j] - req[j];
 	}
+}
+
+//checks if the given request will result in a safe state
+bool safe_state(int n_cust, int request[])
+{
+	bool finish[NUM_CUSTOMERS] = {false};
+	bool allfin = false;
+	int work[NUM_RESOURCES];
+	int i=0;
+	int j=0;
+	int fincount=0;
+	//This section also clones available into work since it cannot be set in a single line because C is a beautiful and efficient language
+	//start by simulating the requested resources going to the customer asking
+	for(j=0;j<NUM_RESOURCES;j++)
+	{
+		work[j] = available[j] - request[j];
+		//the resources are temporarily allocated to the customer, are free'd at the end of loop
+		allocation[n_cust][j] = allocation[n_cust][j] + request[j];
+	}
+	bool res_avail = true;
+	while(allfin == false)
+	{
+		//fincount is an integer to assure that this loop exits when no changes happen for 2 loop iterations
+		fincount = 0;
+		for(i=0;i<NUM_CUSTOMERS;i++)
+		{
+			res_avail = true;
+
+			//checks if the needed resources for customer i are available
+			for(j=0;j<NUM_RESOURCES;j++)
+			{
+				if (work[j] > need[n_cust][j])
+				{
+					res_avail = false;
+				}
+			}
+			//if the resources can be allocated afterwards
+			if(res_avail && finish[n_cust] == false)
+			{
+				//free up resources
+				for(j=0;j<NUM_RESOURCES;j++)
+				{
+					work[j] = work[j] +  allocation[n_cust][j];
+				}
+				finish[i] = true;
+			}
+			//otherwise if the customer was already finished last step
+			else if (finish[n_cust])
+			{
+				//increment the deadlock counter
+				fincount++;
+			}
+
+			//every time we iterate through all customers check if they're all done
+			if (i == 4)
+			{
+				allfin = true;
+				for(j=0;j<NUM_CUSTOMERS;j++)
+				{
+					//if any of them aren't done the system isnt done
+					if(finish[i] == false)
+					{
+						allfin = false;
+						//increment the deadlock counter
+						fincount++;
+					}
+				}
+				//if no changes occured within the last iteration
+				if(fincount == NUM_CUSTOMERS)
+				{
+					allfin = true;
+				}
+			}
+		}
+	}
+	//free the temporary resources
+	for(j=0;j<NUM_RESOURCES;j++)
+	{
+		allocation[n_cust][j] = allocation[n_cust][j] - request[j];
+	}
+	//if the exit of the loop was due to an unsafe state
+	if(fincount == NUM_CUSTOMERS)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+
 }
 
 
@@ -72,7 +162,7 @@ bool request_res(int n_customer, int request[])
 	}
 	for (i=0;i<NUM_RESOURCES;i++)
 	{
-		if (request[i] <= Available)
+		if (request[i] <= available[i])
 		{
 			//do nothing again, so far its good
 		}
@@ -82,8 +172,17 @@ bool request_res(int n_customer, int request[])
 			return false;
 		}
 	}
-	alloc_res(n_customer, request[])
-	return true;
+	//checks if the state is safe before allocation
+	if (safe_state(n_customer, request))
+	{
+		//TODO: try and remember how to pass an entire list in C
+		alloc_res(n_customer, request);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 // Release resources, returns true if successful
@@ -93,7 +192,7 @@ bool release_res(int n_customer, int release[])
 	for (j=0;j<NUM_RESOURCES;j++)
 	{
 		available[j] = available[j] + release[j];
-		allocation[n_customer][j] = allocation[n_cust][j]  - release[j];
+		allocation[n_customer][j] = allocation[n_customer][j]  - release[j];
 		need[n_customer][j] = need[n_customer][j] + release[j];
 	}
 	return true;
