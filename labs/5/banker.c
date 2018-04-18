@@ -40,12 +40,6 @@ int need[NUM_CUSTOMERS][NUM_RESOURCES];
 // The lock to be used by the threads
 pthread_mutex_t lock;
 
-// Test function for testing the threads, TODO can be removed after testing complete
-void* test(void *arg)
-{
-	printf("thread created\n");
-}
-
 // Thread function for customers making a request
 // arg is the customer number
 void* customer_thread(void *arg)
@@ -114,102 +108,85 @@ void alloc_res(int n_cust, int req[])
 	}
 }
 
-//checks if the given request will result in a safe state
 bool safe_state(int n_cust, int request[])
 {
 	bool finish[NUM_CUSTOMERS] = {false};
-	bool allfin = false;
+	bool change = true;
+	bool res_avail;
 	int work[NUM_RESOURCES];
-	int i=0;
-	int j=0;
-	int fincount=0;
-	//This section also clones available into work since it cannot be set in a single line because C is a beautiful and efficient language
-	//start by simulating the requested resources going to the customer asking
+	int i=0,j=0;
+	
 	for(j=0;j<NUM_RESOURCES;j++)
 	{
 		work[j] = available[j] - request[j];
 		//the resources are temporarily allocated to the customer, are free'd at the end of loop
 		allocation[n_cust][j] = allocation[n_cust][j] + request[j];
 	}
-	bool res_avail = true;
-	while(allfin == false)
+
+	//while there are changes in each iteration (avoids stuck in loop errors)
+	while(true)
 	{
-		//fincount is an integer to assure that this loop exits when no changes happen for 2 loop iterations
-		fincount = 0;
-		for(i=0;i<NUM_CUSTOMERS;i++)
+		if(finish[i] == false)
 		{
 			res_avail = true;
-
-			//checks if the needed resources for customer i are available
 			for(j=0;j<NUM_RESOURCES;j++)
 			{
-				if (work[j] > need[n_cust][j])
+				if(work[j] < need[i][j])
 				{
-					res_avail = false;
+					res_avail=false;
+					break;
 				}
 			}
-			//if the resources can be allocated afterwards
-			if(res_avail && finish[n_cust] == false)
+			if(res_avail)
 			{
-				//free up resources
+				finish[i] = true;
+				change = true;
 				for(j=0;j<NUM_RESOURCES;j++)
 				{
-					work[j] = work[j] +  allocation[n_cust][j];
-				}
-				finish[i] = true;
-			}
-			//otherwise if the customer was already finished last step
-			else if (finish[i])
-			{
-				//increment the deadlock counter
-				fincount++;
-			}
-
-			//every time we iterate through all customers check if they're all done
-			if (i == 4)
-			{
-				allfin = true;
-				for(j=0;j<NUM_CUSTOMERS;j++)
-				{
-					//if any of them aren't done the system isnt done
-					if(finish[i] == false)
-					{
-						allfin = false;
-						//increment the deadlock counter
-						fincount++;
-					}
-				}
-				//if no changes occured within the last iteration
-				if(fincount == NUM_CUSTOMERS)
-				{
-					allfin = true;
+					work[j] += allocation[i][j];
 				}
 			}
 		}
+		i++;
+		if(i == NUM_CUSTOMERS)
+		{
+			if (change == false)
+			{
+				break;
+			}
+			else
+			{
+				change = false;
+				i=0;
+			}
+		}
 	}
-	//free the temporary resources
-	for(j=0;j<NUM_RESOURCES;j++)
+	for (i=0;i<NUM_RESOURCES;i++)
 	{
-		allocation[n_cust][j] = allocation[n_cust][j] - request[j];
+		allocation[n_cust][i] -= request[i];
 	}
-	//if the exit of the loop was due to an unsafe state
-	if(fincount == NUM_CUSTOMERS)
+	for(i=0;i<NUM_CUSTOMERS;i++)
 	{
-		return false;
+		//if any of them are not done after an exit from the loop
+		if(finish[i] == false)
+		{
+			return false;
+		}
 	}
-	else
-	{
-		return true;
-	}
-
+	return true;
 }
 
 void reset_customer(int customer_no, int total_available[])
 {
     int j;
+    int cheapo;
+    //if the customer requires less (50% change, this adds randomness)
+    //generates a random # (either 1 or 2)
+    cheapo = (rand() % 2) + 1;
     for (j = 0; j < NUM_RESOURCES; j++)
     {
-        maximum[customer_no][j] = rand() % (total_available[j] + 1);
+
+        maximum[customer_no][j] = rand() % ((total_available[j] + 1)/cheapo);
         need[customer_no][j] = maximum[customer_no][j];
     }
 }
@@ -235,7 +212,6 @@ bool request_res(int n_customer, int request[])
 		}
 		else
 		{
-			//TODO: RAISE ERROR CONDITION
 			return false;
 		}
 	}
@@ -247,14 +223,12 @@ bool request_res(int n_customer, int request[])
 		}
 		else
 		{
-			//Process must wait
 			return false;
 		}
 	}
 	//checks if the state is safe before allocation
 	if (safe_state(n_customer, request))
 	{
-		//TODO: try and remember how to pass an entire list in C
 		alloc_res(n_customer, request);
 		return true;
 	}
@@ -322,7 +296,6 @@ int main(int argc, char *argv[])
     int result;
     for (thread = 0; thread < NUM_CUSTOMERS; thread++)
     {
-        // Creates the thread TODO change to actual function
         result = pthread_create(&threads[thread], NULL, &customer_thread, thread);
         if (result != 0)
         {
