@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <unistd.h>
 #include "banker.h"
 
 // Put any other macros or constants here using #define
@@ -22,8 +23,13 @@
 // Available amount of each resource
 int available[NUM_RESOURCES];
 
+int rand_customer;
+
 // Maximum demand of each customer
 int maximum[NUM_CUSTOMERS][NUM_RESOURCES];
+
+// Total resources the system contains
+int total_available[NUM_RESOURCES];
 
 // Amount currently allocated to each customer
 int allocation[NUM_CUSTOMERS][NUM_RESOURCES];
@@ -34,10 +40,59 @@ int need[NUM_CUSTOMERS][NUM_RESOURCES];
 // The lock to be used by the threads
 pthread_mutex_t lock;
 
-// Test function for testing the threads, TODO can be removed after testing complete
-void* test(void *arg)
+// Thread function for customers making a request
+// arg is the customer number
+void* customer_thread(void *arg)
 {
-	printf("thread created\n");
+    while (1)
+    {
+        if (rand_customer == (int)arg)
+        {
+            // Lock the thread
+            pthread_mutex_lock(&lock);
+
+            int i;
+            int resource;
+            int request[NUM_RESOURCES];
+            // Randomly generate the requests
+            for (i = 0; i < NUM_RESOURCES; i++)
+            {
+                request[i] = rand() % (need[(int)arg][i] + 1);
+            }
+
+            printf("Thread for customer %d:\n", arg);
+
+            // Perform the request
+            printf("The following resources were requested:\n");
+            int j;
+            for (j = 0; j < NUM_RESOURCES; j++)
+            {
+                printf("Type %d: %d resources\n", j, request[j]);
+            }
+            bool request_result = request_res((int)arg, request);
+            // Notifies of request result
+            if (request_result)
+            {
+                printf("Request granted, system would be in a safe state\n");
+            }
+            else
+            {
+                printf("Request denied, system would be in an unsafe state\n");
+            }
+            // Free Resources
+            int release[NUM_RESOURCES];
+            for (i = 0; i < NUM_RESOURCES; i++)
+            {
+                release[i] = rand() % (allocation[(int)arg][i] + 1);
+            }
+            release_res((int)arg, release);
+            printf("Resources released\n");
+
+            // Update random
+            rand_customer = rand() % NUM_CUSTOMERS;
+            pthread_mutex_unlock(&lock);
+        }
+    }
 }
 
 
@@ -53,96 +108,97 @@ void alloc_res(int n_cust, int req[])
 	}
 }
 
-//checks if the given request will result in a safe state
 bool safe_state(int n_cust, int request[])
 {
 	bool finish[NUM_CUSTOMERS] = {false};
-	bool allfin = false;
+	bool change = true;
+	bool res_avail;
 	int work[NUM_RESOURCES];
-	int i=0;
-	int j=0;
-	int fincount=0;
-	//This section also clones available into work since it cannot be set in a single line because C is a beautiful and efficient language
-	//start by simulating the requested resources going to the customer asking
+	int i=0,j=0;
+	
 	for(j=0;j<NUM_RESOURCES;j++)
 	{
 		work[j] = available[j] - request[j];
 		//the resources are temporarily allocated to the customer, are free'd at the end of loop
 		allocation[n_cust][j] = allocation[n_cust][j] + request[j];
 	}
-	bool res_avail = true;
-	while(allfin == false)
+
+	//while there are changes in each iteration (avoids stuck in loop errors)
+	while(true)
 	{
-		//fincount is an integer to assure that this loop exits when no changes happen for 2 loop iterations
-		fincount = 0;
-		for(i=0;i<NUM_CUSTOMERS;i++)
+		if(finish[i] == false)
 		{
 			res_avail = true;
-
-			//checks if the needed resources for customer i are available
 			for(j=0;j<NUM_RESOURCES;j++)
 			{
-				if (work[j] > need[n_cust][j])
+				if(work[j] < need[i][j])
 				{
-					res_avail = false;
+					res_avail=false;
+					break;
 				}
 			}
-			//if the resources can be allocated afterwards
-			if(res_avail && finish[n_cust] == false)
+			if(res_avail)
 			{
-				//free up resources
+				finish[i] = true;
+				change = true;
 				for(j=0;j<NUM_RESOURCES;j++)
 				{
-					work[j] = work[j] +  allocation[n_cust][j];
-				}
-				finish[i] = true;
-			}
-			//otherwise if the customer was already finished last step
-			else if (finish[n_cust])
-			{
-				//increment the deadlock counter
-				fincount++;
-			}
-
-			//every time we iterate through all customers check if they're all done
-			if (i == 4)
-			{
-				allfin = true;
-				for(j=0;j<NUM_CUSTOMERS;j++)
-				{
-					//if any of them aren't done the system isnt done
-					if(finish[i] == false)
-					{
-						allfin = false;
-						//increment the deadlock counter
-						fincount++;
-					}
-				}
-				//if no changes occured within the last iteration
-				if(fincount == NUM_CUSTOMERS)
-				{
-					allfin = true;
+					work[j] += allocation[i][j];
 				}
 			}
 		}
+		i++;
+		if(i == NUM_CUSTOMERS)
+		{
+			if (change == false)
+			{
+				break;
+			}
+			else
+			{
+				change = false;
+				i=0;
+			}
+		}
 	}
-	//free the temporary resources
-	for(j=0;j<NUM_RESOURCES;j++)
+	for (i=0;i<NUM_RESOURCES;i++)
 	{
-		allocation[n_cust][j] = allocation[n_cust][j] - request[j];
+		allocation[n_cust][i] -= request[i];
 	}
-	//if the exit of the loop was due to an unsafe state
-	if(fincount == NUM_CUSTOMERS)
+	for(i=0;i<NUM_CUSTOMERS;i++)
 	{
-		return false;
+		//if any of them are not done after an exit from the loop
+		if(finish[i] == false)
+		{
+			return false;
+		}
 	}
-	else
-	{
-		return true;
-	}
-
+	return true;
 }
 
+void reset_customer(int customer_no, int total_available[])
+{
+    int j;
+    int cheapo;
+    //if the customer requires less (50% change, this adds randomness)
+    //generates a random # (either 1 or 2)
+    cheapo = (rand() % 2) + 1;
+    for (j = 0; j < NUM_RESOURCES; j++)
+    {
+
+        maximum[customer_no][j] = rand() % ((total_available[j] + 1)/cheapo);
+        need[customer_no][j] = maximum[customer_no][j];
+    }
+}
+
+void reset_all_customers(int total_available[])
+{
+    int i;
+    for (i = 0; i < NUM_CUSTOMERS; i++)
+    {
+        reset_customer(i, total_available);
+    }
+}
 
 // Define functions declared in banker.h here
 bool request_res(int n_customer, int request[])
@@ -156,7 +212,6 @@ bool request_res(int n_customer, int request[])
 		}
 		else
 		{
-			//TODO: RAISE ERROR CONDITION
 			return false;
 		}
 	}
@@ -168,14 +223,12 @@ bool request_res(int n_customer, int request[])
 		}
 		else
 		{
-			//Process must wait
 			return false;
 		}
 	}
 	//checks if the state is safe before allocation
 	if (safe_state(n_customer, request))
 	{
-		//TODO: try and remember how to pass an entire list in C
 		alloc_res(n_customer, request);
 		return true;
 	}
@@ -202,6 +255,9 @@ bool release_res(int n_customer, int release[])
 int main(int argc, char *argv[])
 {
     // ==================== YOUR CODE HERE ==================== //
+    time_t t;
+    srand((unsigned) time(&t));
+    rand_customer = 0;
 
     // Read in arguments from CLI, NUM_RESOURCES is the number of arguments   
 	// Checks to make sure proper number of arguments were given
@@ -217,11 +273,10 @@ int main(int argc, char *argv[])
 		int i;
 		for (i = 1; i <= NUM_RESOURCES; i++)
 		{
+            total_available[i - 1] = atoi(argv[i]);
 			available[i - 1] = atoi(argv[i]);
 		}
-	}
-    
-    // Allocate the available resources
+    }
 
     // Initialize the pthreads, locks, mutexes, etc.
 	// Initializes the mutex lock
@@ -233,29 +288,31 @@ int main(int argc, char *argv[])
 	// Create the array of threads
 	pthread_t * threads = malloc(sizeof(pthread_t) * NUM_CUSTOMERS);
 
-    // Run the threads and continually loop
-	while (true)
-	{
-		// Create the threads
-		int thread;
-		int result;
-		for (thread = 0; thread < NUM_CUSTOMERS; thread++)
-		{
-			// Creates the thread TODO change to actual function
-			result = pthread_create(&threads[thread], NULL, &test, NULL);
-			if (result != 0)
-			{
-				printf("Error creating the threads.\n");
-				exit(-1);
-			}
-		}
+    // set all customers up
+    reset_all_customers(total_available);
 
-		// Join all the threads	
-		for (thread = 0; thread < NUM_CUSTOMERS; thread++)
-		{
-			pthread_join(threads[thread], NULL);
-		}
-	}
+    // Create the threads
+    int thread;
+    int result;
+    for (thread = 0; thread < NUM_CUSTOMERS; thread++)
+    {
+        result = pthread_create(&threads[thread], NULL, &customer_thread, thread);
+        if (result != 0)
+        {
+            printf("Error creating the threads.\n");
+            exit(-1);
+        }
+    }
+
+    while (1){
+    }
+
+    /*
+    for (thread = 0; thread < NUM_CUSTOMERS; thread++)
+    {
+        pthread_join(&threads[thread], NULL);
+    }
+    */
 
     // The threads will request and then release random numbers of resources
 
