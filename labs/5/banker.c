@@ -79,19 +79,25 @@ void* customer_thread(void *arg)
             {
                 printf("Request denied, system would be in an unsafe state\n");
             }
+	/*
             // Free Resources
             int release[NUM_RESOURCES];
             for (i = 0; i < NUM_RESOURCES; i++)
             {
                 release[i] = rand() % (allocation[(int)arg][i] + 1);
             }
-            release_res((int)arg, release);
+	*/
+            if(release_res((int)arg))
+	{
             printf("Resources released\n");
+	}
 
             // Update random
             rand_customer = rand() % NUM_CUSTOMERS;
+	    sleep(1);
+	    printf ("\n \n");
             pthread_mutex_unlock(&lock);
-        }
+      	}
     }
 }
 
@@ -179,14 +185,10 @@ bool safe_state(int n_cust, int request[])
 void reset_customer(int customer_no, int total_available[])
 {
     int j;
-    int cheapo;
-    //if the customer requires less (50% change, this adds randomness)
-    //generates a random # (either 1 or 2)
-    cheapo = (rand() % 2) + 1;
     for (j = 0; j < NUM_RESOURCES; j++)
     {
 
-        maximum[customer_no][j] = rand() % ((total_available[j] + 1)/cheapo);
+        maximum[customer_no][j] = rand() % ((total_available[j] + 1));
         need[customer_no][j] = maximum[customer_no][j];
     }
 }
@@ -239,14 +241,24 @@ bool request_res(int n_customer, int request[])
 }
 
 // Release resources, returns true if successful
-bool release_res(int n_customer, int release[])
+bool release_res(int n_customer)
 {
+	int i;
+	for (i=0;i < NUM_RESOURCES;i++)
+	{
+		//if any of the resources aren't fully allocated for the customer don't free up resources
+		if (allocation[n_customer][i] < maximum[n_customer][i])
+		{
+			return false;
+		}
+	}
+	//if it has made it here it is fully allocated and must free its resources
 	int j;
 	for (j=0;j<NUM_RESOURCES;j++)
 	{
-		available[j] = available[j] + release[j];
-		allocation[n_customer][j] = allocation[n_customer][j]  - release[j];
-		need[n_customer][j] = need[n_customer][j] + release[j];
+		available[j] += allocation[n_customer][j];
+		allocation[n_customer][j] = 0;
+		need[n_customer][j] = maximum[n_customer][j];
 	}
 	return true;
 }
