@@ -23,6 +23,8 @@
 // Available amount of each resource
 int available[NUM_RESOURCES];
 
+int rand_customer;
+
 // Maximum demand of each customer
 int maximum[NUM_CUSTOMERS][NUM_RESOURCES];
 
@@ -46,50 +48,56 @@ void* test(void *arg)
 
 // Thread function for customers making a request
 // arg is the customer number
-void* customer_thread(int *arg)
+void* customer_thread(void *arg)
 {
-    while (true)
+    while (1)
     {
-        int i;
-        int resource;
-        int request[NUM_RESOURCES];
-        // Randomly generate the requests
-        for (i = 0; i < NUM_RESOURCES; i++)
+        if (rand_customer == (int)arg)
         {
-            request[i] = rand() % (need[(int)arg][i] + 1);
-        }
+            // Lock the thread
+            pthread_mutex_lock(&lock);
 
-        // Lock the thread
-        pthread_mutex_lock(&lock);
+            int i;
+            int resource;
+            int request[NUM_RESOURCES];
+            // Randomly generate the requests
+            for (i = 0; i < NUM_RESOURCES; i++)
+            {
+                request[i] = rand() % (need[(int)arg][i] + 1);
+            }
 
-        printf("Thread for customer %d:\n", arg);
+            printf("Thread for customer %d:\n", arg);
 
-        // Perform the request
-        printf("The following resources were requested:\n");
-        int j;
-        for (j = 0; j < NUM_RESOURCES; j++)
-        {
-            printf("Type %d: %d resources\n", j, request[j]);
+            // Perform the request
+            printf("The following resources were requested:\n");
+            int j;
+            for (j = 0; j < NUM_RESOURCES; j++)
+            {
+                printf("Type %d: %d resources\n", j, request[j]);
+            }
+            bool request_result = request_res((int)arg, request);
+            // Notifies of request result
+            if (request_result)
+            {
+                printf("Request granted, system would be in a safe state\n");
+            }
+            else
+            {
+                printf("Request denied, system would be in an unsafe state\n");
+            }
+            // Free Resources
+            int release[NUM_RESOURCES];
+            for (i = 0; i < NUM_RESOURCES; i++)
+            {
+                release[i] = rand() % (allocation[(int)arg][i] + 1);
+            }
+            release_res((int)arg, release);
+            printf("Resources released\n");
+
+            // Update random
+            rand_customer = rand() % NUM_CUSTOMERS;
+            pthread_mutex_unlock(&lock);
         }
-        bool request_result = request_res((int)arg, request);
-        // Notifies of request result
-        if (request_result)
-        {
-            printf("Request granted, system would be in a safe state\n");
-        }
-        else
-        {
-            printf("Request denied, system would be in an unsafe state\n");
-        }
-        // Free Resources
-        int release[NUM_RESOURCES];
-        for (i = 0; i < NUM_RESOURCES; i++)
-        {
-            release[i] = rand() % (allocation[(int)arg][i] + 1);
-        }
-        release_res((int)arg, release);
-        printf("Resources released\n");
-        pthread_mutex_unlock(&lock);
     }
 }
 
@@ -151,7 +159,7 @@ bool safe_state(int n_cust, int request[])
 				finish[i] = true;
 			}
 			//otherwise if the customer was already finished last step
-			else if (finish[n_cust])
+			else if (finish[i])
 			{
 				//increment the deadlock counter
 				fincount++;
@@ -275,6 +283,7 @@ int main(int argc, char *argv[])
     // ==================== YOUR CODE HERE ==================== //
     time_t t;
     srand((unsigned) time(&t));
+    rand_customer = 0;
 
     // Read in arguments from CLI, NUM_RESOURCES is the number of arguments   
 	// Checks to make sure proper number of arguments were given
@@ -320,6 +329,11 @@ int main(int argc, char *argv[])
             printf("Error creating the threads.\n");
             exit(-1);
         }
+    }
+
+    for (thread = 0; thread < NUM_CUSTOMERS; thread++)
+    {
+        pthread_join(&threads[thread], NULL);
     }
 
     // The threads will request and then release random numbers of resources
