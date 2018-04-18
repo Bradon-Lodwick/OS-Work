@@ -331,10 +331,15 @@ int main(int argc, char *argv[])
         }
     }
 
+    while (1){
+    }
+
+    /*
     for (thread = 0; thread < NUM_CUSTOMERS; thread++)
     {
         pthread_join(&threads[thread], NULL);
     }
+    */
 
     // The threads will request and then release random numbers of resources
 
